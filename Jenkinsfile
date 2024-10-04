@@ -1,34 +1,52 @@
-version: '3.7'
-services:
-  dind:
-    image: docker:dind
-    user: root
-    privileged: true
-    container_name: dind
-    expose:
-      - 2375
-    networks:
-      - jenkins_dind
-    environment:
-      DOCKER_TLS_CERTDIR: ""
+pipeline {
+    agent {
+        docker {
+            image 'node:16'  // Using Node.js 16 Docker image
+            reuseNode true   // Reuse the same node for multiple stages
+        }
+    }
 
-  jenkins:
-    image: jenkins/jenkins:lts
-    user: root
-    container_name: jenkins
-    depends_on:
-      - dind
-    ports:
-      - 8080:8080
-      - 50000:50000
-    volumes:
-      - ./jenkins:/var/jenkins_home
-      - /usr/bin/docker:/usr/bin/docker
-    environment:
-      DOCKER_HOST: "tcp://dind:2375"
-    networks:
-      - jenkins_dind
+    stages {
+        stage('Install Dependencies') {
+            steps {
+                // Run npm install to install dependencies
+                sh 'npm install --save'
+            }
+        }
 
-networks:
-  jenkins_dind:
-    driver: bridge
+        stage('Build') {
+            steps {
+                // Add build commands if required
+                echo 'Building the application...'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // Add test commands if required
+                echo 'Running tests...'
+                sh 'npm test'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                // Add deployment steps if required
+                echo 'Deploying the application...'
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean up Docker resources after pipeline execution
+            sh 'docker system prune -f'
+        }
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Please check the logs.'
+        }
+    }
+}
