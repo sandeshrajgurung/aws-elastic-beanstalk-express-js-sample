@@ -39,8 +39,14 @@ pipeline {
 
     post {
         always {
-            // Clean up Docker resources after the pipeline is completed
-            sh 'docker system prune -f'
+            // Clean up Docker resources after the pipeline is completed if there is a workspace
+            script {
+                if (currentBuild.result == null) {
+                    sh 'docker system prune -f'
+                } else {
+                    echo 'Skipping cleanup due to pipeline failure.'
+                }
+            }
         }
         success {
             echo 'Pipeline executed successfully!'
