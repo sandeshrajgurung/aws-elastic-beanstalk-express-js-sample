@@ -1,16 +1,13 @@
 pipeline {
     agent {
-        label 'docker'  // Specify a Jenkins agent with Docker capabilities
+        docker {
+            image 'node:16'
+            reuseNode true
+        }
     }
 
     stages {
         stage('Build') {
-            agent {
-                docker {
-                    image 'node:16'  // Use Node 16 Docker image for this stage
-                    reuseNode true   // Reuse the workspace on the container
-                }
-            }
             steps {
                 // Install dependencies using npm
                 sh 'npm install --save'
