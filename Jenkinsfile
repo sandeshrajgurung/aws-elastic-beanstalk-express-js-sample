@@ -1,58 +1,25 @@
 pipeline {
     agent {
         docker {
-            image 'node:16'  // Use Node.js version 16 Docker image
-            reuseNode true   // Reuse the workspace for efficiency
+            image 'node:16'
+            args '-u root' // Optional: use root user to avoid permission issues
         }
     }
 
     stages {
         stage('Install Dependencies') {
             steps {
-                // Install project dependencies using npm
-                sh 'npm install --save'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                // Add your build commands if required (optional)
-                echo 'Building the application...'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                // Add your test commands if required (optional)
-                echo 'Running tests...'
-                sh 'npm test'  // Make sure you have a test script in package.json
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                // Add your deployment commands (optional)
-                echo 'Deploying the application...'
-            }
-        }
-    }
-
-    post {
-        always {
-            // Clean up Docker resources after the pipeline is completed if there is a workspace
-            script {
-                if (currentBuild.result == null) {
-                    sh 'docker system prune -f'
-                } else {
-                    echo 'Skipping cleanup due to pipeline failure.'
+                script {
+                    // Ensure npm is installed
+                    sh 'node -v'
+                    sh 'npm -v'
+                    
+                    // Install dependencies using npm install --save
+                    sh 'npm install --save'
                 }
             }
         }
-        success {
-            echo 'Pipeline executed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed. Please check the logs for details.'
-        }
+
+        // You can add more stages here, like 'Test' or 'Build'
     }
 }
