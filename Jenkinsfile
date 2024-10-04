@@ -1,23 +1,19 @@
 pipeline {
     agent {
-        // Use the official Node 16 Docker image as the agent for this pipeline
-        docker {
-            image 'node:16'
-        }
+        label 'docker'  // Specify a Jenkins agent with Docker capabilities
     }
 
     stages {
-        stage('Install Dependencies') {
+        stage('Build') {
+            agent {
+                docker {
+                    image 'node:16'  // Use Node 16 Docker image for this stage
+                    reuseNode true   // Reuse the workspace on the container
+                }
+            }
             steps {
                 // Install dependencies using npm
                 sh 'npm install --save'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                // Optionally include build steps if needed
-                echo 'Building the application...'
             }
         }
 
@@ -31,22 +27,21 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                // Deploy step placeholder (to be customized based on deployment method)
-                echo 'Deploying the application...'
+                echo 'Deploying application...'
             }
         }
     }
 
     post {
         always {
-            // Cleanup Docker containers after the pipeline is done
+            // Clean up Docker resources after the build
             sh 'docker system prune -f'
         }
         success {
             echo 'Pipeline completed successfully!'
         }
         failure {
-            echo 'Pipeline failed. Check the logs for errors.'
+            echo 'Pipeline failed. Please check the logs.'
         }
     }
 }
